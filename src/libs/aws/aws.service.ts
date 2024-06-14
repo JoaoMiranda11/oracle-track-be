@@ -5,6 +5,7 @@ import * as AWS from 'aws-sdk';
 @Injectable()
 export class AwsService {
   readonly sns: AWS.SNS;
+  readonly ses: AWS.SES;
 
   constructor(private readonly configService: ConfigService) {
     AWS.config.update({
@@ -14,5 +15,6 @@ export class AwsService {
     });
 
     this.sns = new AWS.SNS();
+    this.ses = new AWS.SES();
   }
 }
