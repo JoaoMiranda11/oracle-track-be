@@ -1,3 +1,6 @@
+import { PaymentService } from './modules/payments/payment.service';
+import { PaymentsModule } from './modules/payments/payments.module';
+import { ProductsModule } from './modules/products/products.module';
 import { UserModule } from './modules/user/user.module';
 import { ZenviaModule } from './modules/zenvia/zenvia.module';
 import { DevModule } from './modules/_dev/dev.module';
@@ -12,6 +15,8 @@ import { DbConnections } from './libs/mongoose/connections';
 
 @Module({
   imports: [
+    PaymentsModule,
+    ProductsModule,
     AuthModule,
     UserModule,
     ZenviaModule,

@@ -6,13 +6,32 @@ import * as fs from 'fs';
 import * as Papa from 'papaparse';
 import { join } from 'path';
 import { cleanupPhoneNumber } from 'src/utils/sanetizations';
+import { ProductsService } from '../products/products.service';
+import { PaymentService } from '../payments/payment.service';
 
 @Controller('dev')
 export class DevController {
   constructor(
     private readonly smsService: SmsService,
     private readonly mailService: MailService,
+    private readonly productsService: ProductsService,
+    private readonly paymentsService: PaymentService
   ) {}
+
+  @Post('plan')
+  async createPlan() {
+    return await this.productsService.createPlan({
+      description: 'Plano básico',
+      duration: 30,
+      name: 'BASIC',
+      price: 100000,
+    })
+  }
+
+  @Post('payment')
+  async payment() {
+    return await this.paymentsService.createPlan('jsm2.pe@gmail.com', '666cfea8cbd83cd7a31cdec2')
+  }
 
   @Post('sms')
   async sendSMS(@Body() sendSmsDto: SendSmsDto) {
