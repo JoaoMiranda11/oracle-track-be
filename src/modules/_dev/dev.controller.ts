@@ -8,6 +8,7 @@ import { join } from 'path';
 import { cleanupPhoneNumber } from 'src/utils/sanetizations';
 import { ProductsService } from '../products/products.service';
 import { PaymentService } from '../payments/payment.service';
+import { UserPlanService } from '../userPlan/user-plan.service';
 
 @Controller('dev')
 export class DevController {
@@ -15,7 +16,8 @@ export class DevController {
     private readonly smsService: SmsService,
     private readonly mailService: MailService,
     private readonly productsService: ProductsService,
-    private readonly paymentsService: PaymentService
+    private readonly paymentsService: PaymentService,
+    private readonly userPlanService: UserPlanService,
   ) {}
 
   @Post('plan')
@@ -25,12 +27,15 @@ export class DevController {
       duration: 30,
       name: 'BASIC',
       price: 100000,
-    })
+    });
   }
 
   @Post('payment')
   async payment() {
-    return await this.paymentsService.createPlan('jsm2.pe@gmail.com', '666cfea8cbd83cd7a31cdec2')
+    return await this.userPlanService.purchase(
+      'jsm2.pe@gmail.com',
+      '666cfea8cbd83cd7a31cdec2',
+    );
   }
 
   @Post('sms')

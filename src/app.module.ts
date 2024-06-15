@@ -1,3 +1,4 @@
+import { UserPlanModule } from './modules/userPlan/user-plan.module';
 import { PaymentService } from './modules/payments/payment.service';
 import { PaymentsModule } from './modules/payments/payments.module';
 import { ProductsModule } from './modules/products/products.module';
@@ -15,6 +16,7 @@ import { DbConnections } from './libs/mongoose/connections';
 
 @Module({
   imports: [
+    UserPlanModule,
     PaymentsModule,
     ProductsModule,
     AuthModule,

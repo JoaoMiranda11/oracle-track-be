@@ -1,3 +1,4 @@
+  // TODO: pass to userplan
 import { IsNotEmpty, IsString, IsNumber, IsDate, IsDateString } from 'class-validator';
 
 export class CreateUserPlanDto {
