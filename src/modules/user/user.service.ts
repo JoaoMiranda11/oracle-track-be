@@ -6,6 +6,7 @@ import { Connections } from 'src/libs/mongoose/connections.enum';
 import { CreateUserDto } from './dto/create-user.dto';
 import * as bcrypt from 'bcrypt';
 import { Role } from 'src/guards/roles/roles.enum';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UserService {
@@ -23,6 +24,14 @@ export class UserService {
       throw new NotFoundException('User not found');
     }
     return user;
+  }
+
+  async updateOne(id: string, newData: UpdateUserDto) : Promise<User> {
+    const user = await this.userModel.findById(id);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return await user.updateOne(newData);
   }
 
   async findOne(id: string): Promise<User> {

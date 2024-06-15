@@ -1,1 +1,3 @@
-export const TIMESTAMP_DAY_MS = 24 * 60 * 60 * 1000; 
+export const TIMESTAMP_MIN_MS = 60 * 1000;
+export const TIMESTAMP_HOUR_MS = 60 * TIMESTAMP_MIN_MS;
+export const TIMESTAMP_DAY_MS = 24 * TIMESTAMP_HOUR_MS;
