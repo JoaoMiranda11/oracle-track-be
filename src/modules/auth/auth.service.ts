@@ -68,16 +68,17 @@ export class AuthService {
     return this.jwtService.sign(result);
   }
 
-  async signin(
-    email: string,
-    pass: string,
-  ): Promise<{ hash: string; dueDate: Date } | string> {
+  async getAuthenticatedUser(email: string, pass: string) {
     const user = await this.userService.findOneByEmail(email);
     if (!user) {
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
     await this.testPassword(user, pass);
+    return user;
+  }
 
+  async signin(email: string, pass: string): Promise<{ hash: string; dueDate: Date } | string> {
+    const user = await this.getAuthenticatedUser(email, pass);
     if (user.role === Role.Admin) return await this.createJwt(user);
 
     const authInfo = this.generateAuthInfo();
