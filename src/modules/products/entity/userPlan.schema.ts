@@ -2,24 +2,24 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 
 @Schema({ timestamps: true })
-export class Plans extends Document {
+export class UserPlan extends Document {
+  @Prop({ required: true })
+  userId: string;
+
   @Prop({ required: true, unique: true })
-  name: string;
+  paymentId: string;
 
   @Prop({ required: true })
-  description: string;
+  planId: string;
 
   @Prop({ required: true })
-  price: number;
+  startDate: Date;
 
   @Prop({ required: true })
-  duration: number; // DAYS
+  dueDate: Date;
 
   @Prop({ default: Date.now })
-  createdAt: Date;
-
-  @Prop()
-  recurring?: boolean;
+  createdAt?: Date;
 }
 
-export const PlansSchema = SchemaFactory.createForClass(Plans);
+export const UserPlanSchema = SchemaFactory.createForClass(UserPlan);

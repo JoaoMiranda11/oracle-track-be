@@ -1,6 +1,11 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 
+export interface Credits {
+  email: number;
+  sms: number;
+}
+
 @Schema({ timestamps: true })
 export class User extends Document {
   @Prop({ required: true })
@@ -17,6 +22,9 @@ export class User extends Document {
 
   @Prop({ default: Date.now })
   createdAt: Date;
+
+  @Prop({ type: Object })
+  credits: Credits;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

@@ -6,7 +6,7 @@ export class Payment extends Document {
   @Prop({ required: true })
   userId: string;
 
-  @Prop({ required: true, unique: true })
+  @Prop({ required: true })
   itemId: string;
 
   @Prop({ required: true })
@@ -20,12 +20,24 @@ export class Payment extends Document {
 
   @Prop({ required: true })
   paymentGateway: string;
-  
-  @Prop({ required: true })
+
+  @Prop({ required: true, unique: true })
   paymentId: string;
 
   @Prop({ default: Date.now })
   createdAt?: Date;
+
+  @Prop()
+  discountFlat?: number;
+
+  @Prop()
+  discountPercentage?: number;
+
+  @Prop()
+  details?: string;
+
+  @Prop()
+  taxes?: number;
 }
 
 export const PaymentSchema = SchemaFactory.createForClass(Payment);
