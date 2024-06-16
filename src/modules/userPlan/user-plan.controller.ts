@@ -4,6 +4,7 @@ import {
   Get,
   HttpException,
   Post,
+  Query,
   Request,
   UseGuards,
 } from '@nestjs/common';
@@ -20,8 +21,8 @@ export class UserPlanController {
 
   @UseGuards(JwtAuthGuard)
   @Get('status')
-  async getUserPlanStatus(@Request() req: AuthenticatedRequest) {
-    return await this.userPlanService.getUserPlanStatus(req.user._id as string);
+  async getUserPlanStatus(@Request() req: AuthenticatedRequest, @Query() active: boolean) {
+    return await this.userPlanService.getUserPlanStatus(req.user._id as string, active);
   }
 
   @UseGuards(JwtAuthGuard)

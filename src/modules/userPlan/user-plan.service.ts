@@ -44,8 +44,8 @@ export class UserPlanService {
       .exec();
   }
 
-  async getUserPlanStatus(userId: string) {
-    const userPlan = await this.getLastUserPlan(userId);
+  async getUserPlanStatus(userId: string, active = true) {
+    const userPlan = await this.getLastUserPlan(userId, active);
     if (!userPlan?.planId || !userPlan?.paymentId) return null;
     const plan = await this.productService.getOnePlan(userPlan.planId);
     const payment = await this.paymentService.getOnePayment(userPlan.paymentId);
