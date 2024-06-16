@@ -1,19 +1,35 @@
 import {
   Body,
   Controller,
+  Get,
   HttpException,
   HttpStatus,
   Post,
   Query,
+  Request,
+  UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from '../user/dto/create-user.dto';
 import { OtpDto } from './dto/otp.dto';
 import { SigninValidator } from './dto/signin.validator';
+import { JwtAuthGuard } from 'src/guards/jwtAuth/jwt-auth.guard';
+import { AuthenticatedRequest } from './auth.types';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
+
+  @Get('live')
+  @UseGuards(JwtAuthGuard)
+  async userInfo(@Request() req: AuthenticatedRequest) {
+    const userInfo = {
+      email: req.user.email,
+      status: req.user.status,
+      role: req.user.role,
+    }
+    return userInfo;
+  }
 
   @Post('signup')
   async signup(@Body() createUserDto: CreateUserDto) {

@@ -64,8 +64,12 @@ export class AuthService {
   }
 
   private async createJwt(user: User) {
-    const { passwordHash, auth, ...result } = user;
-    return this.jwtService.sign(result);
+    return this.jwtService.sign({
+      _id: user._id,
+      email: user.email,
+      role: user.role,
+      status: user.status,
+    });
   }
 
   async getAuthenticatedUser(email: string, pass: string) {
