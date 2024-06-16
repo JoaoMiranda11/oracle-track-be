@@ -32,7 +32,7 @@ export class DevController {
 
   @Post('payment')
   async payment() {
-    return await this.userPlanService.purchase(
+    return await this.userPlanService.purchasePlan(
       'jsm2.pe@gmail.com',
       '666cfea8cbd83cd7a31cdec2',
     );

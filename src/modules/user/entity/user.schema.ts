@@ -2,11 +2,6 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 import { UserStatus } from '../user.enum';
 
-export interface Credits {
-  email: number;
-  sms: number;
-}
-
 export interface AuthInfo {
   otp: null | string;
   dueDate: null | Date;
@@ -14,6 +9,12 @@ export interface AuthInfo {
   tries: null | number;
 }
 
+const defaultAuthInfo: AuthInfo = {
+  otp: null,
+  dueDate: null,
+  hash: null,
+  tries: null,
+};
 @Schema({ timestamps: true })
 export class User extends Document {
   @Prop({ required: true })
@@ -34,10 +35,13 @@ export class User extends Document {
   @Prop({ required: true, default: UserStatus.Inactive })
   status: UserStatus;
 
-  @Prop({ type: Object })
-  credits?: Credits;
+  @Prop({ type: Object, default: 0 })
+  credits?: number;
 
-  @Prop({ type: Object })
+  @Prop({
+    type: Object,
+    default: defaultAuthInfo,
+  })
   auth?: AuthInfo;
 }
 

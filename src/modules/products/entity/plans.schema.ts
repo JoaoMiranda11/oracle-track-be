@@ -12,6 +12,9 @@ export class Plans extends Document {
   @Prop({ required: true })
   price: number;
 
+  @Prop({ required: true, default: 0 })
+  credits: number;
+
   @Prop({ required: true })
   duration: number; // DAYS
 

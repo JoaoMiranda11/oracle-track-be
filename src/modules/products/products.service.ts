@@ -26,6 +26,10 @@ export class ProductsService {
     return await this.plansModel.findById(id).lean();
   }
 
+  async getPlanByName(name: string): Promise<Plans> {
+    return await this.plansModel.findOne({ name }).lean();
+  }
+
   async getOnePackage(id: string): Promise<Packages> {
     return await this.PackagesModel.findById(id).lean();
   }

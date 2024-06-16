@@ -7,5 +7,6 @@ export enum PaymentStatus {
 export enum PaymentGateway {
     Pagarme = 'pagarme',
     Starkbank = 'starkbank',
-    Boleto = 'boleto'
+    Boleto = 'boleto',
+    Manual = 'manual'
 }

@@ -1,6 +1,12 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import {
+  BadRequestException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { InjectConnection, InjectModel } from '@nestjs/mongoose';
+import { ClientSession, Connection, Model } from 'mongoose';
 import { User } from './entity/user.schema';
 import { Connections } from 'src/libs/mongoose/connections.enum';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -12,6 +18,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 export class UserService {
   constructor(
     @InjectModel(User.name, Connections.main) private userModel: Model<User>,
+    @InjectConnection(Connections.main) private readonly connection: Connection,
   ) {}
 
   async findAll(): Promise<User[]> {
@@ -26,12 +33,39 @@ export class UserService {
     return user;
   }
 
-  async updateOne(id: string, newData: UpdateUserDto) : Promise<User> {
+  async updateOne(id: string, newData: UpdateUserDto): Promise<User> {
     const user = await this.userModel.findById(id);
     if (!user) {
       throw new NotFoundException('User not found');
     }
     return await user.updateOne(newData);
+  }
+
+  async updateUserCredits(userId: string, credits: number): Promise<User> {
+    const session: ClientSession = await this.connection.startSession();
+    session.startTransaction();
+    try {
+      const user = await this.userModel.findById(userId).session(session);
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+
+      user.credits = (user.credits || 0) + credits;
+      await user.save({ session });
+
+      await session.commitTransaction();
+      session.endSession();
+
+      return user;
+    } catch (error) {
+      await session.abortTransaction();
+      session.endSession();
+      console.error(error);
+      throw new HttpException(
+        'Error updating user credits',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   async findOne(id: string): Promise<User> {

@@ -6,6 +6,7 @@ import { UserPlanService } from './user-plan.service';
 import { ProductsModule } from '../products/products.module';
 import { PaymentsModule } from '../payments/payments.module';
 import { UserModule } from '../user/user.module';
+import { UserPlanController } from './user-plan.controller';
 
 @Module({
   imports: [
@@ -17,7 +18,7 @@ import { UserModule } from '../user/user.module';
     PaymentsModule,
     UserModule,
   ],
-  controllers: [],
+  controllers: [UserPlanController],
   providers: [UserPlanService],
   exports: [UserPlanService],
 })
