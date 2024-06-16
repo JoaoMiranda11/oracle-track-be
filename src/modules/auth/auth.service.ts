@@ -83,7 +83,6 @@ export class AuthService {
 
   async signin(email: string, pass: string): Promise<{ hash: string; dueDate: Date } | string> {
     const user = await this.getAuthenticatedUser(email, pass);
-    if (user.role === Role.Admin) return await this.createJwt(user);
 
     const authInfo = this.generateAuthInfo();
     await this.userService.updateOne(user._id as string, {
