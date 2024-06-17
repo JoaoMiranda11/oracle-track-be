@@ -6,7 +6,8 @@ import { CreateUserDto } from '../user/dto/create-user.dto';
 import { v4 as uuidv4 } from 'uuid';
 import { TIMESTAMP_MIN_MS } from 'src/utils/dates';
 import { Role } from 'src/guards/roles/roles.enum';
-import { User } from '../user/entity/user.schema';
+import { User, UserDocument } from '../user/entity/user.schema';
+import { UserStatus } from '../user/user.enum';
 
 @Injectable()
 export class AuthService {
@@ -36,16 +37,20 @@ export class AuthService {
   }
 
   private async bruteforceAllert(id: string) {
+    // TODO: trigger email notify
     console.error(`[SEC_DANG]: Possible bruteforce ${id}`);
   }
 
-  private async triggerInvalidPass(user: User) {
+  private async triggerInvalidPass(user: UserDocument) {
     const tries = (user.auth?.tries ?? 0) + 1;
     if (tries > this.maxTriesPass) {
-      await this.bruteforceAllert(user._id as string);
+      await this.bruteforceAllert(user._id as unknown as string);
       throw new HttpException('Invalid credentials', HttpStatus.UNAUTHORIZED);
     }
-    await this.userService.updateOne(user._id as string, {
+    const status =
+      tries === this.maxTriesPass ? {} : { status: UserStatus.Blocked };
+    await this.userService.updateOne(user._id as unknown as string, {
+      ...status,
       auth: {
         dueDate: null,
         hash: null,
@@ -55,7 +60,7 @@ export class AuthService {
     });
   }
 
-  private async testPassword(user: User, pass) {
+  private async testPassword(user: UserDocument, pass: string) {
     const matchPass = await bcrypt.compare(pass, user.passwordHash);
     if (!matchPass) {
       await this.triggerInvalidPass(user);
@@ -63,7 +68,7 @@ export class AuthService {
     }
   }
 
-  private async createJwt(user: User) {
+  private async createJwt(user: UserDocument) {
     return this.jwtService.sign({
       _id: user._id,
       email: user.email,
@@ -81,11 +86,14 @@ export class AuthService {
     return user;
   }
 
-  async signin(email: string, pass: string): Promise<{ hash: string; dueDate: Date } | string> {
+  async signin(
+    email: string,
+    pass: string,
+  ): Promise<{ hash: string; dueDate: Date } | string> {
     const user = await this.getAuthenticatedUser(email, pass);
 
     const authInfo = this.generateAuthInfo();
-    await this.userService.updateOne(user._id as string, {
+    await this.userService.updateOne(user._id as unknown as string, {
       auth: authInfo,
     });
     const { hash, dueDate } = authInfo;

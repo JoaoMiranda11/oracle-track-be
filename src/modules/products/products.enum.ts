@@ -1,4 +1,8 @@
 export enum ProductsEnum {
-    Plan = 'plan',
-    Package = 'package'
+  Plan = 'plan',
+  Package = 'package',
+}
+
+export enum PackageEnum {
+  CREDITS = 'credits',
 }

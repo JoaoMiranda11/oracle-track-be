@@ -4,7 +4,6 @@ import { SmsModule } from '../sms/sms.module';
 import { MailModule } from '../mail/mail.module';
 import { ProductsModule } from '../products/products.module';
 import { PaymentsModule } from '../payments/payments.module';
-import { UserPlanModule } from '../userPlan/user-plan.module';
 
 @Module({
   imports: [
@@ -12,7 +11,6 @@ import { UserPlanModule } from '../userPlan/user-plan.module';
     MailModule,
     ProductsModule,
     PaymentsModule,
-    UserPlanModule,
   ],
   controllers: [DevController],
   providers: [],

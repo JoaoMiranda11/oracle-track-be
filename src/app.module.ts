@@ -1,5 +1,6 @@
-import { UserPlanModule } from './modules/userPlan/user-plan.module';
-import { PaymentService } from './modules/payments/payment.service';
+import { CheckoutModule } from './modules/checkout/checkout.module';
+import { WebhooksModule } from './modules/webhook/webhooks.module';
+import { UserPlansModule } from './modules/userPlans/userPlans.module';
 import { PaymentsModule } from './modules/payments/payments.module';
 import { ProductsModule } from './modules/products/products.module';
 import { UserModule } from './modules/user/user.module';
@@ -16,7 +17,9 @@ import { DbConnections } from './libs/mongoose/connections';
 
 @Module({
   imports: [
-    UserPlanModule,
+    CheckoutModule,
+    WebhooksModule,
+    UserPlansModule,
     PaymentsModule,
     ProductsModule,
     AuthModule,

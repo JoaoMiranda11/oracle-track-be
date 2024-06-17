@@ -5,46 +5,37 @@ import {
   IsDate,
   IsString,
   IsOptional,
+  IsNotEmpty,
+  Min,
 } from 'class-validator';
-import { Type } from 'class-transformer';
-import { ProductsEnum } from 'src/modules/products/products.enum';
-import { PaymentGateway, PaymentStatus } from '../payment.enum';
+import { PaymentGateway, PaymentMethod, PaymentStatus, ProductType } from '../payment.enum';
 
 export class CreatePaymentDto {
+  @IsNotEmpty()
+  recurring: boolean;
+
+  @IsNotEmpty()
   @IsMongoId()
-  readonly userId: string;
-
-  @IsMongoId()
-  readonly itemId: string;
-
-  @IsEnum(ProductsEnum)
-  readonly itemType: ProductsEnum;
-
-  @IsNumber()
-  readonly amount: number;
-
-  @IsEnum(PaymentStatus)
-  readonly status: PaymentStatus;
+  planName: string;
 
   @IsEnum(PaymentGateway)
-  readonly paymentGateway: PaymentGateway;
+  gateway: PaymentGateway;
+
+  @IsEnum(PaymentMethod)
+  method: PaymentMethod;
+
+  @IsNumber()
+  @Min(1)
+  installments: number;
 
   @IsString()
-  readonly paymentId: string;
-
-  @IsString()
   @IsOptional()
-  readonly details?: string;
+  discountToken?: string;
+}
 
-  @IsNumber()
-  @IsOptional()
-  readonly discountFlat?: number;
 
-  @IsNumber()
-  @IsOptional()
-  readonly discountPercentage?: number;
-
-  @IsNumber()
-  @IsOptional()
-  readonly taxes?: number;
+export class PaymentDto extends CreatePaymentDto {
+  @IsNotEmpty()
+  @IsMongoId()
+  userId: string;
 }

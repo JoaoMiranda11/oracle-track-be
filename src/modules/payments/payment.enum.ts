@@ -1,12 +1,25 @@
+export enum ProductType {
+  PLAN = 'plan',
+  PACKAGE = 'package',
+  PLAN_UPGRADE = 'plan_upgrade',
+}
+
+export enum PaymentMethod {
+  PIX = 'pix',
+  CREDIT_CARD = 'credit-card',
+  TICKET = 'ticket',
+}
+
 export enum PaymentStatus {
-    Paid = 'paid',
-    Pending = 'pending',
-    Refused = 'refused',
+  PAID = 'paid',
+  PENDING = 'pending',
+  CANCELED = 'canceled',
+  EXPIRED = 'expired',
 }
 
 export enum PaymentGateway {
-    Pagarme = 'pagarme',
-    Starkbank = 'starkbank',
-    Boleto = 'boleto',
-    Manual = 'manual'
+  Pagarme = 'pagarme',
+  Starkbank = 'starkbank',
+  Boleto = 'boleto',
+  Manual = 'manual',
 }

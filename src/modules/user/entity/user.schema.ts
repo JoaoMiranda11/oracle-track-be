@@ -1,22 +1,36 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
 import { UserStatus } from '../user.enum';
 
-export interface AuthInfo {
-  otp: null | string;
-  dueDate: null | Date;
-  hash: null | string;
-  tries: null | number;
+@Schema()
+export class AuthInfo extends Document {
+  @Prop({ type: String, default: null })
+  otp: string | null;
+
+  @Prop({ type: Date, default: null })
+  dueDate: Date | null;
+
+  @Prop({ type: String, default: null })
+  hash: string | null;
+
+  @Prop({ type: Number, default: 0 })
+  tries: number;
 }
 
-const defaultAuthInfo: AuthInfo = {
-  otp: null,
-  dueDate: null,
-  hash: null,
-  tries: null,
-};
+@Schema()
+export class UserPlan {
+  @Prop({ type: Types.ObjectId, ref: 'Plan', required: true })
+  planId: Types.ObjectId;
+
+  @Prop({ type: Date, required: true })
+  startDate: Date;
+
+  @Prop({ type: Date, required: true })
+  dueDate: Date;
+}
+
 @Schema({ timestamps: true })
-export class User extends Document {
+export class User {
   @Prop({ required: true })
   name: string;
 
@@ -29,20 +43,29 @@ export class User extends Document {
   @Prop({ required: true })
   role: string;
 
-  @Prop({ default: Date.now })
+  @Prop({ default: Date.now() })
   createdAt: Date;
 
   @Prop({ required: true, default: UserStatus.Inactive })
   status: UserStatus;
 
-  @Prop({ type: Object, default: 0 })
-  credits?: number;
+  @Prop({ required: true, type: Number, default: 0 })
+  credits: number;
+
+  @Prop({ type: UserPlan })
+  plan: UserPlan;
 
   @Prop({
     type: Object,
-    default: defaultAuthInfo,
+    default: {
+      otp: null,
+      dueDate: null,
+      hash: null,
+      tries: 0,
+    },
   })
-  auth?: AuthInfo;
+  auth: AuthInfo;
 }
 
+export type UserDocument = User & { _id: Types.ObjectId};
 export const UserSchema = SchemaFactory.createForClass(User);

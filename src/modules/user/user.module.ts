@@ -1,8 +1,10 @@
 import { Connections } from 'src/libs/mongoose/connections.enum';
 import { UserService } from './user.service';
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { User, UserSchema } from './entity/user.schema';
 import { MongooseModule } from '@nestjs/mongoose';
+import { UserController } from './user.controller';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
   imports: [
@@ -10,8 +12,9 @@ import { MongooseModule } from '@nestjs/mongoose';
       [{ name: User.name, schema: UserSchema }],
       Connections.main,
     ),
+    forwardRef(() => AuthModule)
   ],
-  controllers: [],
+  controllers: [UserController],
   providers: [UserService],
   exports: [UserService],
 })

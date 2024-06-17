@@ -6,13 +6,12 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
-import { ClientSession, Connection, Model } from 'mongoose';
-import { User } from './entity/user.schema';
+import { ClientSession, Connection, Model, UpdateQuery } from 'mongoose';
+import { User, UserDocument } from './entity/user.schema';
 import { Connections } from 'src/libs/mongoose/connections.enum';
 import { CreateUserDto } from './dto/create-user.dto';
 import * as bcrypt from 'bcrypt';
 import { Role } from 'src/guards/roles/roles.enum';
-import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UserService {
@@ -21,11 +20,11 @@ export class UserService {
     @InjectConnection(Connections.main) private readonly connection: Connection,
   ) {}
 
-  async findAll(): Promise<User[]> {
+  async findAll() {
     return this.userModel.find().exec();
   }
 
-  async findOneByEmail(email: string): Promise<User> {
+  async findOneByEmail(email: string) {
     const user = await this.userModel.findOne({ email }).lean();
     if (!user) {
       throw new NotFoundException('User not found');
@@ -33,7 +32,7 @@ export class UserService {
     return user;
   }
 
-  async updateOne(id: string, newData: UpdateUserDto): Promise<User> {
+  async updateOne(id: string, newData: UpdateQuery<User>) {
     const user = await this.userModel.findById(id);
     if (!user) {
       throw new NotFoundException('User not found');
@@ -50,7 +49,7 @@ export class UserService {
         throw new NotFoundException('User not found');
       }
 
-      user.credits = (user.credits || 0) + credits;
+      user.credits += credits;
       await user.save({ session });
 
       await session.commitTransaction();
@@ -68,15 +67,11 @@ export class UserService {
     }
   }
 
-  async findOne(id: string): Promise<User> {
-    const user = await this.userModel.findById(id).exec();
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-    return user;
+  async findOne(id: string) {
+    return await this.userModel.findById(id).lean();
   }
 
-  async create(createUserDto: CreateUserDto): Promise<User> {
+  async create(createUserDto: CreateUserDto) {
     const { name, email, password } = createUserDto;
 
     const existingUser = await this.userModel.findOne({ email }).exec();
@@ -87,12 +82,12 @@ export class UserService {
     const salt = await bcrypt.genSalt();
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    const newUser = new this.userModel({
+    const newUser = await this.userModel.create({
       name,
       email,
       passwordHash: hashedPassword,
       role: Role.User,
     });
-    return newUser.save();
+    return newUser;
   }
 }

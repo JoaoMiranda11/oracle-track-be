@@ -1,43 +1,56 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
+import {
+  PaymentGateway,
+  PaymentMethod,
+  PaymentStatus,
+  ProductType,
+} from '../payment.enum';
 
-@Schema({ timestamps: true })
-export class Payment extends Document {
+@Schema()
+export class Payment {
   @Prop({ required: true })
-  userId: string;
+  recurring: boolean;
+
+  @Prop({ type: Types.ObjectId, required: true })
+  productId: Types.ObjectId;
+
+  @Prop({ enum: ProductType, required: true })
+  productType: ProductType;
+
+  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
+  userId: Types.ObjectId;
+
+  @Prop({ enum: PaymentMethod, required: true })
+  method: PaymentMethod;
+
+  @Prop({ enum: PaymentGateway, required: true })
+  paymentGateway: PaymentGateway;
 
   @Prop({ required: true })
-  itemId: string;
-
-  @Prop({ required: true })
-  itemType: string;
-
-  @Prop({ required: true })
-  amount: number;
-
-  @Prop({ required: true })
-  status: string;
-
-  @Prop({ required: true })
-  paymentGateway: string;
-
-  @Prop({ required: true, unique: true })
   paymentId: string;
 
-  @Prop({ default: Date.now })
-  createdAt?: Date;
+  @Prop({ required: true })
+  value: number;
+
+  @Prop({ required: true })
+  discount: number;
+
+  @Prop({ enum: PaymentStatus, required: true })
+  status: PaymentStatus;
+
+  @Prop({ type: Date, required: true })
+  dueDate: Date;
+
+  @Prop({ required: true })
+  installments: number;
+
+  @Prop({ type: Object })
+  metadata?: any;
 
   @Prop()
-  discountFlat?: number;
-
-  @Prop()
-  discountPercentage?: number;
-
-  @Prop()
-  details?: string;
-
-  @Prop()
-  taxes?: number;
+  description?: string;
 }
 
+export type PaymentDocument = Document<Payment>;
 export const PaymentSchema = SchemaFactory.createForClass(Payment);

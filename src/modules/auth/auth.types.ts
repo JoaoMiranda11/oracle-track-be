@@ -2,7 +2,7 @@ import { Request } from 'express';
 import { ObjectId } from 'mongoose';
 
 export interface JwtUserInfo {
-  _id: string | ObjectId;
+  _id: string;
   email: string;
   role: string;
   status: string;
