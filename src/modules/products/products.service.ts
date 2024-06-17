@@ -18,7 +18,7 @@ export class ProductsService {
   ) {}
 
   async getAllPlanExchange() {
-    return await this.planExchangeModel.find()
+    return await this.planExchangeModel.find();
   }
 
   async getAllPlans() {
@@ -37,8 +37,12 @@ export class ProductsService {
     return await this.planModel.findOne({ name }).lean();
   }
 
+  async getPlanExchangeByName(name: string) {
+    return await this.planExchangeModel.findOne({ name });
+  }
+
   async getOnePlanExchange(id: string) {
-    return await this.planExchangeModel.findById(id)
+    return await this.planExchangeModel.findById(id);
   }
 
   async getOnePackage(id: string): Promise<Packages> {

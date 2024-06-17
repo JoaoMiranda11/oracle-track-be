@@ -10,7 +10,7 @@ import {
 } from 'class-validator';
 import { PaymentGateway, PaymentMethod, PaymentStatus, ProductType } from '../payment.enum';
 
-export class CreatePaymentDto {
+export class CreatePlanPaymentDto {
   @IsNotEmpty()
   recurring: boolean;
 
@@ -33,8 +33,30 @@ export class CreatePaymentDto {
   discountToken?: string;
 }
 
+export class UpgradePlanDto {
+  @IsNotEmpty()
+  recurring: boolean;
 
-export class PaymentDto extends CreatePaymentDto {
+  @IsNotEmpty()
+  @IsMongoId()
+  exchangePlanName: string;
+
+  @IsEnum(PaymentGateway)
+  gateway: PaymentGateway;
+
+  @IsEnum(PaymentMethod)
+  method: PaymentMethod;
+
+  @IsNumber()
+  @Min(1)
+  installments: number;
+
+  @IsString()
+  @IsOptional()
+  discountToken?: string;
+}
+
+export class PaymentDto extends CreatePlanPaymentDto {
   @IsNotEmpty()
   @IsMongoId()
   userId: string;

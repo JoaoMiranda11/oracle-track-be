@@ -25,7 +25,6 @@ export class WebhooksService {
 
   async approvePayment(paymentId: string, metadata: any) {
     const payment = await this.paymentService.approvePayment(paymentId);
-
     switch (payment.productType) {
       case ProductType.PLAN:
         await this.userPlanService.subscribePlan(

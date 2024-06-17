@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Payment } from './entity/payment.schema';
 import { Connections } from 'src/libs/mongoose/connections.enum';
 import { Model } from 'mongoose';
-import { CreatePaymentDto } from './dto/create-payment.dto';
+import { CreatePlanPaymentDto } from './dto/create-payment.dto';
 import { v4 as uuidv4 } from 'uuid';
 import {
   PaymentGateway,
