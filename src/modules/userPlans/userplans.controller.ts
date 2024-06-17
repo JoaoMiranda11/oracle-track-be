@@ -14,8 +14,9 @@ export class UserPlansController {
     if (!planInfo) return null;
     const res = {
       name: planInfo.plan.name,
-      dueDate: planInfo.dueDate ?? null,
-      startDate: planInfo.startDate ?? null,
+      dueDate: planInfo.dueDate,
+      startDate: planInfo.startDate,
+      tier: planInfo.plan.tier,
     };
     return res;
   }

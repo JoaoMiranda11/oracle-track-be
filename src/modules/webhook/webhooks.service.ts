@@ -35,7 +35,7 @@ export class WebhooksService {
         );
         await this.userService.addUserCredits(userId, pack.credits)
         break;
-      case ProductType.PLAN_UPGRADE:
+      case ProductType.PLAN_EXCHANGE:
         const planExchange = await this.productsService.getOnePlanExchange(productId)
         await this.userPlanService.updatePlan(
           userId,

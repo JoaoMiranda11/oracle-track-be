@@ -6,7 +6,7 @@ export class Plan {
   @Prop({ type: Types.ObjectId, required: false })
   _id: Types.ObjectId | string;
 
-  @Prop({ required: true, unique: true })
+  @Prop({ required: true, unique: true }) 
   name: string;
 
   @Prop({ required: true })

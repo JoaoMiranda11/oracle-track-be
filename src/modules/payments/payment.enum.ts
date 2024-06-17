@@ -1,7 +1,7 @@
 export enum ProductType {
   PLAN = 'plan',
   PACKAGE = 'package',
-  PLAN_UPGRADE = 'plan_upgrade',
+  PLAN_EXCHANGE = 'plan_exchange',
 }
 
 export enum PaymentMethod {
