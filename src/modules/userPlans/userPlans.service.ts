@@ -2,6 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import { ProductsService } from '../products/products.service';
 import { TIMESTAMP_DAY_MS } from 'src/utils/dates';
+import { UserPlanInfo } from './userplans.types';
 
 @Injectable()
 export class UserPlansService {
@@ -25,7 +26,7 @@ export class UserPlansService {
     const now = new Date(Date.now());
     const currentStartDate = user?.plan?.startDate || now;
     const currentDueDate = user?.plan?.dueDate || now;
-    await this.userService.updateOne(userId, {
+    return await this.userService.updateOne(userId, {
       $set: {
         plan: {
           planId: plan._id,
@@ -70,7 +71,29 @@ export class UserPlansService {
     });
   }
 
-  async getUserPlanInfo(userId: string) {
+  async getPlanByUserId(userId: string): Promise<UserPlanInfo | null> {
+    const user = await this.userService.findOne(userId);
+    if (!user) throw new HttpException('User not found!', HttpStatus.NOT_FOUND);
+    const plan = await this.productsService.getOnePlan(
+      user?.plan?.planId as any,
+    );
+    if (!plan) return null;
+    return {
+      dueDate: user.plan.dueDate,
+      startDate: user.plan.startDate,
+      plan: {
+        planId: user.plan.planId as unknown as string,
+        planCredits: plan.credits,
+        description: plan.description,
+        duration: plan.duration,
+        name: plan.name,
+        price: plan.price,
+        tier: plan.tier,
+      }
+    };
+  }
+
+  async getUserPlanInfo(userId: string): Promise<null | UserPlanInfo> {
     const user = await this.userService.findOne(userId);
     if (!user) throw new HttpException('User not found!', HttpStatus.NOT_FOUND);
     const plan = await this.productsService.getOnePlan(
@@ -79,9 +102,17 @@ export class UserPlansService {
     if (!plan) return null;
 
     return {
-      name: plan.name,
-      dueDate: user.plan?.dueDate ?? null,
-      startDate: user.plan?.startDate ?? null,
+      dueDate: user.plan.dueDate,
+      startDate: user.plan.startDate,
+      plan: {
+        planId: user.plan.planId as unknown as string,
+        planCredits: plan.credits,
+        description: plan.description,
+        duration: plan.duration,
+        name: plan.name,
+        price: plan.price,
+        tier: plan.tier,
+      }
     };
   }
 }

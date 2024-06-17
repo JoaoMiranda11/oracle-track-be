@@ -17,7 +17,7 @@ export class Packages {
   price: number;
 
   @Prop({ required: true })
-  quantity: number;
+  credits: number;
 
   @Prop({ default: Date.now() })
   createdAt?: Date;

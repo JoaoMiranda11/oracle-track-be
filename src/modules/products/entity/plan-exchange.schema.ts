@@ -14,6 +14,9 @@ export class PlanExchange {
 
   @Prop({ required: true })
   price: number;
+
+  @Prop({ required: true })
+  credits: number;
 }
 
 export type PlanExchangeDocument = Document<PlanExchange>;

@@ -37,6 +37,13 @@ export class ProductsService {
     return await this.planModel.findOne({ name }).lean();
   }
 
+  async getPlanExchangeByPlansIds(initialPlanId: string, finalPlanId: string) {
+    return await this.planExchangeModel.findOne({
+      initialPlan: initialPlanId,
+      finalPlan: finalPlanId,
+    })
+  }
+
   async getPlanExchangeByName(name: string) {
     return await this.planExchangeModel.findOne({ name });
   }

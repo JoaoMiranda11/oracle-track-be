@@ -11,6 +11,12 @@ export class UserPlansController {
   @Get()
   async getPlan(@Request() req: AuthenticatedRequest) {
     const planInfo = await this.userPlanService.getUserPlanInfo(req.user._id);
-    return planInfo;
+    if (!planInfo) return null;
+    const res = {
+      name: planInfo.plan.name,
+      dueDate: planInfo.dueDate ?? null,
+      startDate: planInfo.startDate ?? null,
+    };
+    return res;
   }
 }

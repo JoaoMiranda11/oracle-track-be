@@ -37,14 +37,38 @@ export class CheckoutController {
     const product = await this.productsService.getPlanByName(planName);
     if (!product)
       throw new HttpException('Product not found', HttpStatus.NOT_FOUND);
-    const currentPlan = await this.userPlansService.getUserPlanInfo(userId);
-    if (currentPlan.name === product.name)
+    const currentPlan = await this.userPlansService.getPlanByUserId(userId);
+    if (currentPlan?.plan?.name === product.name)
       throw new HttpException(
         'Plan already been subscribed',
         HttpStatus.BAD_REQUEST,
       );
-
     const discount = productDto.discountToken;
+
+    if (currentPlan) {
+      const exchangePlan = await this.productsService.getPlanExchangeByPlansIds(
+        currentPlan?.plan?.planId as unknown as string,
+        product._id as unknown as string,
+      );
+      if (!exchangePlan) throw new HttpException(
+        'Plan exchange not found!',
+        HttpStatus.NOT_FOUND,
+      );
+
+      await this.paymentService.createPayment({
+        description: product.description,
+        discount: 0,
+        gateway: productDto.gateway,
+        installments: productDto.installments,
+        method: productDto.method,
+        productId: exchangePlan._id as unknown as string,
+        productType: ProductType.PLAN_UPGRADE,
+        recurring: productDto.recurring,
+        userId,
+        value: exchangePlan.price,
+      });
+    }
+
     await this.paymentService.createPayment({
       description: product.description,
       discount: 0,
@@ -66,7 +90,7 @@ export class CheckoutController {
     @Body() productDto: UpgradePlanDto,
   ) {
     const userId = req.user._id as any;
-    const currentPlan = await this.userPlansService.getUserPlanInfo(userId);
+    const currentPlan = await this.userPlansService.getPlanByUserId(userId);
     if (!currentPlan)
       throw new HttpException('Plan not found', HttpStatus.NOT_FOUND);
     const exchangeName = productDto.exchangePlanName as any;
@@ -77,7 +101,7 @@ export class CheckoutController {
     const oldProduct = await this.productsService.getOnePlan(
       exchange.initialPlan as unknown as string,
     );
-    if (oldProduct.name !== currentPlan.name)
+    if (oldProduct.name !== currentPlan?.plan.name)
       throw new HttpException('Missmatch Plans!', HttpStatus.CONFLICT);
     const product = await this.productsService.getOnePlan(
       exchange.destinationPlan as unknown as string,

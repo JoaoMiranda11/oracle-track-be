@@ -6,7 +6,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
-import { ClientSession, Connection, Model, UpdateQuery } from 'mongoose';
+import { ClientSession, Connection, Model, UpdateQuery, UpdateWriteOpResult } from 'mongoose';
 import { User, UserDocument } from './entity/user.schema';
 import { Connections } from 'src/libs/mongoose/connections.enum';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -37,10 +37,11 @@ export class UserService {
     if (!user) {
       throw new NotFoundException('User not found');
     }
-    return await user.updateOne(newData);
+    const res: UpdateWriteOpResult = await user.updateOne(newData);;
+    return res;
   }
 
-  async updateUserCredits(userId: string, credits: number): Promise<User> {
+  async addUserCredits(userId: string, credits: number): Promise<User> {
     const session: ClientSession = await this.connection.startSession();
     session.startTransaction();
     try {

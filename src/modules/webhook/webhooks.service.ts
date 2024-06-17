@@ -16,33 +16,32 @@ export class WebhooksService {
     private readonly productsService: ProductsService,
   ) {}
 
-  private async applyPack(userId: string, pack: Packages) {
-    switch (pack.type) {
-      case PackageEnum.CREDITS:
-        await this.userService.updateUserCredits(userId, pack.quantity);
-    }
-  }
-
   async approvePayment(paymentId: string, metadata: any) {
     const payment = await this.paymentService.approvePayment(paymentId);
+    const userId = payment.userId as any;
+    const productId = payment.productId as any;
     switch (payment.productType) {
       case ProductType.PLAN:
+        const plan = await this.productsService.getOnePlan(productId)
         await this.userPlanService.subscribePlan(
-          payment.userId as any,
-          payment.productId as any,
+          userId,
+          productId,
         );
+        await this.userService.addUserCredits(userId, plan.credits)
         break;
       case ProductType.PACKAGE:
         const pack = await this.productsService.getOnePackage(
-          payment.productId as any,
+          productId,
         );
-        await this.applyPack(payment.userId as any, pack);
+        await this.userService.addUserCredits(userId, pack.credits)
         break;
       case ProductType.PLAN_UPGRADE:
+        const planExchange = await this.productsService.getOnePlanExchange(productId)
         await this.userPlanService.updatePlan(
-          payment.userId as any,
-          payment.productId as any,
+          userId,
+          productId,
         );
+        await this.userService.addUserCredits(userId, planExchange.credits)
         break;
     }
 
