@@ -24,6 +24,7 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   async userInfo(@Request() req: AuthenticatedRequest) {
     const userInfo = {
+      _id: req.user._id,
       email: req.user.email,
       status: req.user.status,
       role: req.user.role,

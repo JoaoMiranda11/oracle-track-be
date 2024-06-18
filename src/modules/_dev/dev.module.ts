@@ -4,6 +4,7 @@ import { SmsModule } from '../sms/sms.module';
 import { MailModule } from '../mail/mail.module';
 import { ProductsModule } from '../products/products.module';
 import { PaymentsModule } from '../payments/payments.module';
+import { WebsocketModule } from '../websocket/websocket.module';
 
 @Module({
   imports: [
@@ -11,6 +12,7 @@ import { PaymentsModule } from '../payments/payments.module';
     MailModule,
     ProductsModule,
     PaymentsModule,
+    WebsocketModule,
   ],
   controllers: [DevController],
   providers: [],

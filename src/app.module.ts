@@ -1,3 +1,4 @@
+import { WebsocketGateway } from './modules/websocket/websocket.gateway';
 import { CheckoutModule } from './modules/checkout/checkout.module';
 import { WebhooksModule } from './modules/webhook/webhooks.module';
 import { UserPlansModule } from './modules/userPlans/userPlans.module';
@@ -14,6 +15,7 @@ import { ConfigModule } from '@nestjs/config';
 import { IS_DEV } from './utils/globals';
 import { AuthModule } from './modules/auth/auth.module';
 import { DbConnections } from './libs/mongoose/connections';
+import { WebsocketModule } from './modules/websocket/websocket.module';
 
 @Module({
   imports: [
@@ -27,6 +29,7 @@ import { DbConnections } from './libs/mongoose/connections';
     ZenviaModule,
     MailModule,
     SmsModule,
+    WebsocketModule,
     ...DbConnections,
     ...(IS_DEV ? [DevModule] : []),
     ConfigModule.forRoot({

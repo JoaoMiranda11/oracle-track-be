@@ -8,6 +8,8 @@ import { join } from 'path';
 import { cleanupPhoneNumber } from 'src/utils/sanetizations';
 import { ProductsService } from '../products/products.service';
 import { PaymentService } from '../payments/payment.service';
+import { WebsocketGateway } from '../websocket/websocket.gateway';
+import { WebsocketService } from '../websocket/websocket.service';
 
 @Controller('dev')
 export class DevController {
@@ -16,6 +18,7 @@ export class DevController {
     private readonly mailService: MailService,
     private readonly productsService: ProductsService,
     private readonly paymentsService: PaymentService,
+    private readonly wsService: WebsocketService,
   ) {}
 
   @Post('plan')
@@ -26,6 +29,15 @@ export class DevController {
       name: 'BASIC',
       price: 100000,
     });
+  }
+
+  @Post('ws')
+  async sendMsg() {
+    await this.wsService.emitToUser(
+      '666fb9eebdee4cc9815e5243',
+      'notification',
+      'Teste',
+    );
   }
 
   @Post('sms')
