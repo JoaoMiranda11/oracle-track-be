@@ -8,8 +8,8 @@ export class UserPlansController {
   constructor(private readonly userPlanService: UserPlansService) {}
 
   @UseGuards(JwtAuthGuard)
-  @Get()
-  async getPlan(@Request() req: AuthenticatedRequest) {
+  @Get('/current')
+  async getCurrentPlan(@Request() req: AuthenticatedRequest) {
     const planInfo = await this.userPlanService.getUserPlanInfo(req.user._id);
     if (!planInfo) return null;
     const res = {
@@ -19,5 +19,10 @@ export class UserPlansController {
       tier: planInfo.plan.tier,
     };
     return res;
+  }
+
+  @Get()
+  async getAllPlans() {
+    return await this.userPlanService.getAllPlans();
   }
 }

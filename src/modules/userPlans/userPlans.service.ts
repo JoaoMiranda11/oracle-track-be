@@ -11,6 +11,10 @@ export class UserPlansService {
     private readonly productsService: ProductsService,
   ) {}
 
+  async getAllPlans() {
+    return await this.productsService.getAllPlans()
+  }
+
   async updatePlan(userId: string, exchangePlanId: string) {
     const user = await this.userService.findOne(userId);
     if (!user) throw new HttpException('User not found!', HttpStatus.NOT_FOUND);

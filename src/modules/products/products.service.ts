@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Model } from 'mongoose';
+import { Model, ObjectId } from 'mongoose';
 import { Plan } from './entity/plan.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Connections } from 'src/libs/mongoose/connections.enum';
@@ -22,7 +22,15 @@ export class ProductsService {
   }
 
   async getAllPlans() {
-    return await this.planModel.find();
+    return await this.planModel.find(undefined, {
+      _id: 1,
+      credits: 1,
+      description: 1,
+      name: 1,
+      price: 1,
+      duration: 1,
+      tier: 1,
+    });
   }
 
   async getAllPackages() {
@@ -37,11 +45,14 @@ export class ProductsService {
     return await this.planModel.findOne({ name }).lean();
   }
 
-  async getPlanExchangeByPlansIds(initialPlanId: string, finalPlanId: string) {
+  async getPlanExchangeByPlansIds(
+    initialPlanId: string | ObjectId,
+    destinationPlanId: string | ObjectId,
+  ) {
     return await this.planExchangeModel.findOne({
       initialPlan: initialPlanId,
-      finalPlan: finalPlanId,
-    })
+      destinationPlan: destinationPlanId,
+    });
   }
 
   async getPlanExchangeByName(name: string) {

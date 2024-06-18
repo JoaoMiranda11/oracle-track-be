@@ -43,33 +43,11 @@ export class CheckoutController {
         'Plan already been subscribed',
         HttpStatus.BAD_REQUEST,
       );
+    
+    // TODO: discount logic
     const discount = productDto.discountToken;
 
-    if (currentPlan) {
-      const exchangePlan = await this.productsService.getPlanExchangeByPlansIds(
-        currentPlan?.plan?.planId as unknown as string,
-        product._id as unknown as string,
-      );
-      if (!exchangePlan) throw new HttpException(
-        'Plan exchange not found!',
-        HttpStatus.NOT_FOUND,
-      );
-
-      await this.paymentService.createPayment({
-        description: product.description,
-        discount: 0,
-        gateway: productDto.gateway,
-        installments: productDto.installments,
-        method: productDto.method,
-        productId: exchangePlan._id as unknown as string,
-        productType: ProductType.PLAN_EXCHANGE,
-        recurring: productDto.recurring,
-        userId,
-        value: exchangePlan.price,
-      });
-    }
-
-    await this.paymentService.createPayment({
+    let paymentDto = {
       description: product.description,
       discount: 0,
       gateway: productDto.gateway,
@@ -80,48 +58,34 @@ export class CheckoutController {
       recurring: productDto.recurring,
       userId,
       value: product.price,
-    });
-  }
+    };
 
-  @UseGuards(JwtAuthGuard)
-  @Post('exchange/plan')
-  async upgradePlan(
-    @Request() req: AuthenticatedRequest,
-    @Body() productDto: UpgradePlanDto,
-  ) {
-    const userId = req.user._id as any;
-    const currentPlan = await this.userPlansService.getPlanByUserId(userId);
-    if (!currentPlan)
-      throw new HttpException('Plan not found', HttpStatus.NOT_FOUND);
-    const exchangeName = productDto.exchangePlanName as any;
-    const exchange =
-      await this.productsService.getPlanExchangeByName(exchangeName);
-    if (!exchange)
-      throw new HttpException('Plan not found', HttpStatus.NOT_FOUND);
-    const oldProduct = await this.productsService.getOnePlan(
-      exchange.initialPlan as unknown as string,
-    );
-    if (oldProduct.name !== currentPlan?.plan.name)
-      throw new HttpException('Missmatch Plans!', HttpStatus.CONFLICT);
-    const product = await this.productsService.getOnePlan(
-      exchange.destinationPlan as unknown as string,
-    );
-    if (!product)
-      throw new HttpException('Product not found', HttpStatus.NOT_FOUND);
+    if (currentPlan) {
+      const exchangePlan = await this.productsService.getPlanExchangeByPlansIds(
+        currentPlan?.plan?.planId as unknown as string,
+        product._id as unknown as string,
+      );
+      if (!exchangePlan)
+        throw new HttpException(
+          'Plan exchange not found!',
+          HttpStatus.NOT_FOUND,
+        );
 
-    const discount = productDto.discountToken;
-    await this.paymentService.createPayment({
-      description: product.description,
-      discount: 0,
-      gateway: productDto.gateway,
-      installments: productDto.installments,
-      method: productDto.method,
-      productId: exchange._id as unknown as string,
-      productType: ProductType.PLAN_EXCHANGE,
-      recurring: productDto.recurring,
-      userId,
-      value: exchange.price,
-    });
+      paymentDto = {
+        description: product.description,
+        discount: 0,
+        gateway: productDto.gateway,
+        installments: productDto.installments,
+        method: productDto.method,
+        productId: exchangePlan._id as unknown as string,
+        productType: ProductType.PLAN_EXCHANGE,
+        recurring: productDto.recurring,
+        userId,
+        value: exchangePlan.price,
+      };
+    }
+
+    await this.paymentService.createPayment(paymentDto);
   }
 
   @UseGuards(JwtAuthGuard)
