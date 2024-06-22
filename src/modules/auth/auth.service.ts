@@ -68,15 +68,6 @@ export class AuthService {
     }
   }
 
-  private async createJwt(user: UserDocument) {
-    return this.jwtService.sign({
-      _id: user._id,
-      email: user.email,
-      role: user.role,
-      status: user.status,
-    });
-  }
-
   async getAuthenticatedUser(email: string, pass: string) {
     const user = await this.userService.findOneByEmail(email);
     if (!user) {
@@ -110,7 +101,7 @@ export class AuthService {
   async otp(
     { email, otp }: OtpDto,
     reqInfo: { ip: string; userAgent: string },
-  ): Promise<string> {
+  ) {
     const user = await this.userService.findOneByEmail(email);
     if (!user) {
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
@@ -129,6 +120,13 @@ export class AuthService {
     if (!validOtp) {
       throw new HttpException('Wrong OTP!', HttpStatus.UNAUTHORIZED);
     }
-    return await this.createJwt(user);
+    const userInfo = {
+      _id: user._id,
+      email: user.email,
+      role: user.role,
+      status: user.status,
+    };
+    const token = this.jwtService.sign(userInfo);
+    return { token, userInfo };
   }
 }

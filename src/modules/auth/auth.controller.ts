@@ -7,6 +7,7 @@ import {
   Post,
   Query,
   Request,
+  Res,
   UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
@@ -17,10 +18,21 @@ import { JwtAuthGuard } from 'src/guards/jwtAuth/jwt-auth.guard';
 import { AuthenticatedRequest } from './auth.types';
 import { RequestUserAgent } from 'src/decorators/requestUserAgent.decorator';
 import { RequestIp } from 'src/decorators/requestIp.decorator';
+import { Response } from 'express';
+import * as cookie from 'cookie';
+import { ExpirationJwt } from 'src/guards/jwtAuth/jwtAuth.module';
+import { ConfigService } from '@nestjs/config';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  readonly tokenName: string;
+
+  constructor(
+    private readonly authService: AuthService,
+    private readonly configService: ConfigService,
+  ) {
+    this.tokenName = configService.get<string>('TOKEN_NAME');
+  }
 
   @Get('live')
   @UseGuards(JwtAuthGuard)
@@ -70,7 +82,22 @@ export class AuthController {
     @Body() otpDto: OtpDto,
     @RequestUserAgent() userAgent: string,
     @RequestIp() ip: string,
+    @Res() res: Response,
   ) {
-    return await this.authService.otp(otpDto, { userAgent, ip });
+    const { token, userInfo } = await this.authService.otp(otpDto, {
+      userAgent,
+      ip,
+    });
+    const options = {
+      httpOnly: true,
+      secure: true,
+      maxAge: ExpirationJwt,
+      path: '/',
+    };
+    res.setHeader(
+      'Set-Cookie',
+      cookie.serialize(this.tokenName, token, options),
+    );
+    return res.send(userInfo);
   }
 }
