@@ -5,34 +5,34 @@ import * as bcrypt from 'bcrypt';
 import { CreateUserDto } from '../user/dto/create-user.dto';
 import { v4 as uuidv4 } from 'uuid';
 import { TIMESTAMP_MIN_MS } from 'src/utils/dates';
-import { Role } from 'src/guards/roles/roles.enum';
-import { User, UserDocument } from '../user/entity/user.schema';
+import { hotp } from 'otplib';
+import { UserDocument } from '../user/entity/user.schema';
 import { UserStatus } from '../user/user.enum';
+import { ConfigService } from '@nestjs/config';
+import { OtpDto } from './dto/otp.dto';
 
 @Injectable()
 export class AuthService {
   readonly otpExpirationTimestamp = TIMESTAMP_MIN_MS * 5;
   readonly maxTriesPass = 5;
+  private readonly otpSalts = 19;
 
   constructor(
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
   ) {}
 
-  generateOtp(length: number = 6): string {
-    const otp = uuidv4().replace(/-/g, '').substring(0, length);
-    return otp.toUpperCase();
-  }
-
-  private generateAuthInfo() {
-    const otp = this.generateOtp();
-    const dueDate = new Date(Date.now() + this.otpExpirationTimestamp);
+  private generateAuthInfo(requestInfos: { ip: string; userAgent: string }) {
     const hash = uuidv4();
+    const otp = hotp.generate(hash, this.otpSalts);
+    const dueDate = new Date(Date.now() + this.otpExpirationTimestamp);
+    console.log(`[OTP]: ${otp}`);
     return {
       hash,
       dueDate,
-      otp,
       tries: 0,
+      ip: requestInfos.ip,
+      userAgent: requestInfos.userAgent,
     };
   }
 
@@ -87,18 +87,18 @@ export class AuthService {
   }
 
   async signin(
-    email: string,
-    pass: string,
-  ): Promise<{ hash: string; dueDate: Date } | string> {
-    const user = await this.getAuthenticatedUser(email, pass);
+    userInfo: { email: string; pass: string },
+    requestInfo: { ip: string; userAgent: string },
+  ): Promise<Date> {
+    const user = await this.getAuthenticatedUser(userInfo.email, userInfo.pass);
 
-    const authInfo = this.generateAuthInfo();
+    const authInfo = this.generateAuthInfo(requestInfo);
     await this.userService.updateOne(user._id as unknown as string, {
       auth: authInfo,
     });
-    const { hash, dueDate } = authInfo;
+    const { dueDate } = authInfo;
 
-    return { hash, dueDate };
+    return dueDate;
   }
 
   async signup(userInfo: CreateUserDto) {
@@ -107,17 +107,27 @@ export class AuthService {
     });
   }
 
-  async otp(email: string, otp: string, hash: string): Promise<string> {
+  async otp(
+    { email, otp }: OtpDto,
+    reqInfo: { ip: string; userAgent: string },
+  ): Promise<string> {
     const user = await this.userService.findOneByEmail(email);
     if (!user) {
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
-    if (user.auth.hash !== hash) {
+    if (user.auth.userAgent !== reqInfo.userAgent) {
+      await this.triggerInvalidPass(user);
+    }
+    if (user.auth.ip !== reqInfo.ip) {
       await this.triggerInvalidPass(user);
     }
     const now = new Date(Date.now());
-    if (user.auth.otp !== otp || user.auth.dueDate < now) {
-      throw new HttpException('Wrong OTP or expired!', HttpStatus.UNAUTHORIZED);
+    if (user.auth.dueDate < now) {
+      throw new HttpException('Expired!', HttpStatus.UNAUTHORIZED);
+    }
+    const validOtp = hotp.check(otp, user.auth.hash, this.otpSalts);
+    if (!validOtp) {
+      throw new HttpException('Wrong OTP!', HttpStatus.UNAUTHORIZED);
     }
     return await this.createJwt(user);
   }

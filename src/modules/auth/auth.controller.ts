@@ -15,6 +15,8 @@ import { OtpDto } from './dto/otp.dto';
 import { SigninValidator } from './dto/signin.validator';
 import { JwtAuthGuard } from 'src/guards/jwtAuth/jwt-auth.guard';
 import { AuthenticatedRequest } from './auth.types';
+import { RequestUserAgent } from 'src/decorators/requestUserAgent.decorator';
+import { RequestIp } from 'src/decorators/requestIp.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -28,7 +30,7 @@ export class AuthController {
       email: req.user.email,
       status: req.user.status,
       role: req.user.role,
-    }
+    };
     return userInfo;
   }
 
@@ -41,19 +43,34 @@ export class AuthController {
   async signin(
     @Query('email') email: string,
     @Query('password') password: string,
+    @RequestUserAgent() userAgent: string,
+    @RequestIp() ip: string,
   ) {
     const validCredentials = SigninValidator.safeParse({ email, password });
     if (validCredentials.error) {
-      throw new HttpException(validCredentials.error.errors, HttpStatus.UNAUTHORIZED);
+      throw new HttpException(
+        validCredentials.error.errors,
+        HttpStatus.UNAUTHORIZED,
+      );
     }
     return await this.authService.signin(
-      validCredentials.data.email,
-      validCredentials.data.password,
+      {
+        email: validCredentials.data.email,
+        pass: validCredentials.data.password,
+      },
+      {
+        ip,
+        userAgent,
+      },
     );
   }
 
   @Post('otp')
-  async otp(@Body() otpDto: OtpDto) {
-    return await this.authService.otp(otpDto.email, otpDto.otp, otpDto.hash);
+  async otp(
+    @Body() otpDto: OtpDto,
+    @RequestUserAgent() userAgent: string,
+    @RequestIp() ip: string,
+  ) {
+    return await this.authService.otp(otpDto, { userAgent, ip });
   }
 }

@@ -1,17 +1,20 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Types } from 'mongoose';
+import { Types } from 'mongoose';
 import { UserStatus } from '../user.enum';
 
 @Schema()
-export class AuthInfo extends Document {
+export class AuthInfo {
   @Prop({ type: String, default: null })
-  otp: string | null;
+  hash: string | null;
 
   @Prop({ type: Date, default: null })
   dueDate: Date | null;
 
   @Prop({ type: String, default: null })
-  hash: string | null;
+  userAgent: string | null;
+
+  @Prop({ type: String, default: null })
+  ip: string | null;
 
   @Prop({ type: Number, default: 0 })
   tries: number;
@@ -60,7 +63,7 @@ export class User {
     default: {
       otp: null,
       dueDate: null,
-      hash: null,
+      ip: null,
       tries: 0,
     },
   })
