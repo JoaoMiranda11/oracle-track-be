@@ -16,7 +16,7 @@ import { Role } from 'src/guards/roles/roles.enum';
 @Injectable()
 export class UserService {
   constructor(
-    @InjectModel(User.name, Connections.main) private userModel: Model<User>,
+    @InjectModel(User.name, Connections.main) private readonly userModel: Model<User>,
     @InjectConnection(Connections.main) private readonly connection: Connection,
   ) {}
 
