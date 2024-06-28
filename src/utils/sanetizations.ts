@@ -1,4 +1,5 @@
 interface phoneInputs {
+  name?: string;
   phone: string;
 }
 
@@ -15,7 +16,7 @@ export function testValidPhoneNumber(phone: string) {
 }
 
 
-export function cleanupPhoneNumber(phones: phoneInputs[] = []) {
+export function cleanupPhoneNumbers(phones: phoneInputs[] = []) {
   const invalidPhoneUsers: any[] = [];
   const validPhones = phones.filter((userInfo) => {
     if (!userInfo.phone || typeof userInfo.phone !== 'string') {

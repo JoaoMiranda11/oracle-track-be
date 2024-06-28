@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   Post,
   UploadedFile,
@@ -6,8 +7,8 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { SmsService } from './sms.service';
-import * as fs from 'fs';
-import * as path from 'path';
+import { cleanupPhoneNumbers } from 'src/utils/sanetizations';
+import { SendSmsDto } from './dto/sendSms.dto';
 
 @Controller('sms')
 export class SmsController {
@@ -15,9 +16,12 @@ export class SmsController {
 
   @Post('upload')
   @UseInterceptors(FileInterceptor('file'))
-  async uploadFile(@UploadedFile() file) {
-    await this.smsService.processCSV(file);
+  async uploadFile(@UploadedFile() file, @Body() body: SendSmsDto) {
+    const data = await this.smsService.processCSV(file);
+    const { invalid, valid } = cleanupPhoneNumbers(data);
+    const phones = valid.map((message) => message.phone);
+    await this.smsService.sendMany(body.message, phones);
 
-    return { message: 'File uploaded and processed successfully' };
+    return { invalid: invalid.length, valid: valid.length };
   }
 }

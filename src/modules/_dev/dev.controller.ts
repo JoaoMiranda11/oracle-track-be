@@ -5,7 +5,7 @@ import { MailService } from '../mail/mail.service';
 import * as fs from 'fs';
 import * as Papa from 'papaparse';
 import { join } from 'path';
-import { cleanupPhoneNumber } from 'src/utils/sanetizations';
+import { cleanupPhoneNumbers } from 'src/utils/sanetizations';
 import { ProductsService } from '../products/products.service';
 import { PaymentService } from '../payments/payment.service';
 import { WebsocketGateway } from '../websocket/websocket.gateway';
@@ -45,7 +45,7 @@ export class DevController {
     const { phoneNumber, message } = sendSmsDto;
 
     try {
-      await this.smsService.sendSMS(phoneNumber, message);
+      await this.smsService.sendOne(phoneNumber, message);
       return 'SMS sent successfully.';
     } catch (error) {
       return 'Failed to send SMS.';
@@ -60,7 +60,7 @@ export class DevController {
       header: true,
     });
 
-    const { invalid, valid } = cleanupPhoneNumber(
+    const { invalid, valid } = cleanupPhoneNumbers(
       (results.data ?? []) as any[],
     );
 
@@ -72,7 +72,7 @@ export class DevController {
 
     const message =
       'Seja bem-vindo à Apostei.com! Uma experiência incrível aguarda por você. Deposite qualquer valor para receber até R$600 de Saldo em sua conta: https://apostei.com/';
-    await this.smsService.sendSMS('+5587991140155', message);
+    await this.smsService.sendOne('+5587991140155', message);
 
     return {
       enviados: valid?.length,
