@@ -73,6 +73,9 @@ export class AuthService {
     if (!user) {
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
+    if (user.status === UserStatus.Blocked) {{
+      throw new HttpException('User blocked', HttpStatus.NOT_FOUND);
+    }}
     await this.testPassword(user, pass);
     return user;
   }
