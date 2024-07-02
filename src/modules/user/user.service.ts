@@ -6,7 +6,13 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
-import { ClientSession, Connection, Model, UpdateQuery, UpdateWriteOpResult } from 'mongoose';
+import {
+  ClientSession,
+  Connection,
+  Model,
+  UpdateQuery,
+  UpdateWriteOpResult,
+} from 'mongoose';
 import { User, UserDocument } from './entity/user.schema';
 import { Connections } from 'src/libs/mongoose/connections.enum';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -16,9 +22,15 @@ import { Role } from 'src/guards/roles/roles.enum';
 @Injectable()
 export class UserService {
   constructor(
-    @InjectModel(User.name, Connections.main) private readonly userModel: Model<User>,
+    @InjectModel(User.name, Connections.main)
+    private readonly userModel: Model<User>,
     @InjectConnection(Connections.main) private readonly connection: Connection,
   ) {}
+
+  async getUserCredits(email: string) {
+    const user = await this.userModel.findOne({ email }).lean();
+    return user.credits ?? 0;
+  }
 
   async findAll() {
     return this.userModel.find().exec();
@@ -37,7 +49,7 @@ export class UserService {
     if (!user) {
       throw new NotFoundException('User not found');
     }
-    const res: UpdateWriteOpResult = await user.updateOne(newData);;
+    const res: UpdateWriteOpResult = await user.updateOne(newData);
     return res;
   }
 

@@ -1,9 +1,19 @@
-import { Body, Controller, Get, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Patch,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthService } from '../auth/auth.service';
 import { UserService } from './user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { JwtAuthGuard } from 'src/guards/jwtAuth/jwt-auth.guard';
+import { RequestUser } from 'src/decorators/requestUser.decorator';
+import { JwtUserInfo } from '../auth/auth.types';
 
 @Controller('user')
 export class UserController {
@@ -11,6 +21,12 @@ export class UserController {
     private readonly authService: AuthService,
     private readonly userService: UserService,
   ) {}
+
+  @UseGuards(JwtAuthGuard)
+  @Get('credits')
+  async getCredits(@RequestUser() req: JwtUserInfo) {
+    return await this.userService.getUserCredits(req.email);
+  }
 
   @UseGuards(JwtAuthGuard)
   @Patch('update')
