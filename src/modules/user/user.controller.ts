@@ -23,12 +23,6 @@ export class UserController {
   ) {}
 
   @UseGuards(JwtAuthGuard)
-  @Get('credits')
-  async getCredits(@RequestUser() req: JwtUserInfo) {
-    return await this.userService.getUserCredits(req.email);
-  }
-
-  @UseGuards(JwtAuthGuard)
   @Patch('update')
   async update(
     @Query('email') email: string,

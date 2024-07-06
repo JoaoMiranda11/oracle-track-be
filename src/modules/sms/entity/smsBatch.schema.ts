@@ -11,6 +11,9 @@ export class SmsBatch {
   @Prop({ required: true })
   message: string;
 
+  @Prop({ required: true })
+  ammount: number;
+
   @Prop({ type: Object })
   metadata: any;
 

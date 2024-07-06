@@ -8,6 +8,8 @@ import { SmsBatch } from './entity/smsBatch.schema';
 import { MessageStatus, SmsProvider } from './sms.enum';
 import { Delay } from 'src/utils/common';
 import { v4 as uuidv4 } from 'uuid';
+import { CreditsService } from '../credits/credits.service';
+import { CreditCosts } from '../credits/credits.enum';
 
 interface MessageRes {
   phone: string;
@@ -27,6 +29,7 @@ export class SmsService {
     private readonly smsMessageModel: Model<SmsMessage>,
     @InjectModel(SmsBatch.name, Connections.main)
     private readonly smsBatchModel: Model<SmsBatch>,
+    private readonly creditsService: CreditsService,
   ) {}
 
   async processCSV(file: Express.Multer.File) {
@@ -53,6 +56,7 @@ export class SmsService {
     userId: string | ObjectId,
     provider: SmsProvider,
     message: string,
+    ammount: number,
     metadata?: any,
   ) {
     const batch = await this.smsBatchModel.create({
@@ -60,7 +64,13 @@ export class SmsService {
       metadata,
       provider,
       userId,
+      ammount,
     });
+    const creditsSpent = ammount * CreditCosts.SMS * -1;
+    await this.creditsService.addUserCredits(
+      userId as unknown as string,
+      creditsSpent,
+    );
 
     return batch;
   }
@@ -80,7 +90,7 @@ export class SmsService {
       status: MessageStatus.FAILED,
     };
     try {
-      const externalId = ''; // uuidv4(); TODO: use external id? is it needed?
+      const externalId = uuidv4();
       const res = await this.mockDisparoPro({
         phone: phoneNumber,
         message: message,
@@ -113,11 +123,11 @@ export class SmsService {
       debounce: number;
     },
   ) {
-    // TODO: use transaction
     const batch = await this.createBatch(
       userId,
       SmsProvider.DISPARO_PRO,
       message,
+      phones.length,
     );
     let count = 0;
     const debounce = on?.debounce ?? 0;
@@ -137,7 +147,8 @@ export class SmsService {
       };
       return promise();
     });
-    return await Promise.all(promises);
+    const result = await Promise.all(promises);
+    return result;
   }
 
   async mockDisparoPro(data: any) {
@@ -157,6 +168,7 @@ export class SmsService {
       userId,
       SmsProvider.DISPARO_PRO,
       message,
+      1,
     );
     return await this.sendMessage(
       batch._id as unknown as string,

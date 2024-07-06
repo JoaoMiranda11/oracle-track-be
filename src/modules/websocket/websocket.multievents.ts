@@ -1,5 +1,5 @@
 import { WebsocketService } from './websocket.service';
-import { WebsocketEventNames } from './websocket.enum';
+import { WsEventsServer } from './websocket.enum';
 
 export class WebsocketEventInstance {
   readonly wss: WebsocketService;
@@ -9,7 +9,7 @@ export class WebsocketEventInstance {
   constructor(
     wss: WebsocketService,
     userId: string,
-    event: WebsocketEventNames,
+    event: WsEventsServer,
   ) {
     this.wss = wss;
     this.userId = userId;

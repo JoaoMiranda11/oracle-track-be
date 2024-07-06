@@ -18,6 +18,11 @@ import { Connections } from 'src/libs/mongoose/connections.enum';
 import { CreateUserDto } from './dto/create-user.dto';
 import * as bcrypt from 'bcrypt';
 import { Role } from 'src/guards/roles/roles.enum';
+import {
+  QueryOptions,
+  QueryFindOptions,
+  QueryProjection,
+} from 'src/utils/aux.types';
 
 @Injectable()
 export class UserService {
@@ -27,61 +32,62 @@ export class UserService {
     @InjectConnection(Connections.main) private readonly connection: Connection,
   ) {}
 
-  async getUserCredits(email: string) {
-    const user = await this.userModel.findOne({ email }).lean();
-    return user.credits ?? 0;
-  }
-
   async findAll() {
     return this.userModel.find().exec();
   }
 
-  async findOneByEmail(email: string) {
-    const user = await this.userModel.findOne({ email }).lean();
+  async findOneByEmail(email: string, options?: QueryFindOptions<User>) {
+    const user = options?.session
+      ? await this.userModel
+          .findOne({ email }, options?.project)
+          .session(options.session)
+          .lean()
+      : await this.userModel.findOne({ email }, options?.project).lean();
     if (!user) {
       throw new NotFoundException('User not found');
     }
     return user;
   }
 
-  async updateOne(id: string, newData: UpdateQuery<User>) {
-    const user = await this.userModel.findById(id);
+  async findOneAndUpdate(
+    id: string,
+    newData: UpdateQuery<User>,
+    options?: QueryOptions,
+  ): Promise<UpdateWriteOpResult> {
+    const findCb = this.userModel.findById;
+    const session = options?.session;
+    const user = session ? await findCb(id).session(session) : await findCb(id);
     if (!user) {
       throw new NotFoundException('User not found');
     }
-    const res: UpdateWriteOpResult = await user.updateOne(newData);
-    return res;
+    if (session)
+      return await user.updateOne({ _id: id }, newData).session(session);
+    return await user.updateOne({ _id: id }, newData);
   }
 
-  async addUserCredits(userId: string, credits: number): Promise<User> {
-    const session: ClientSession = await this.connection.startSession();
-    session.startTransaction();
-    try {
-      const user = await this.userModel.findById(userId).session(session);
-      if (!user) {
-        throw new NotFoundException('User not found');
-      }
+  async updateOne(
+    id: string,
+    newData: UpdateQuery<User>,
+    options?: QueryOptions,
+  ) {
+    if (options?.session)
+      return await this.userModel
+        .updateOne({ _id: id }, newData)
+        .session(options.session);
+    return await this.userModel.updateOne({ _id: id }, newData);
+  }
 
-      user.credits += credits;
-      await user.save({ session });
-
-      await session.commitTransaction();
-      session.endSession();
-
-      return user;
-    } catch (error) {
-      await session.abortTransaction();
-      session.endSession();
-      console.error(error);
-      throw new HttpException(
-        'Error updating user credits',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+  async findOne(id: string, options?: QueryFindOptions<User>) {
+    let project: QueryProjection<User & { _id: any }>;
+    if (options?.project) {
+      project = { _id: 1, ...options.project };
     }
-  }
-
-  async findOne(id: string) {
-    return await this.userModel.findById(id).lean();
+    if (options?.session)
+      return await this.userModel
+        .findById(id, project)
+        .session(options.session)
+        .lean();
+    return this.userModel.findById(id, project).lean();
   }
 
   async create(createUserDto: CreateUserDto) {

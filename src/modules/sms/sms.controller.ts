@@ -14,7 +14,7 @@ import { JwtAuthGuard } from 'src/guards/jwtAuth/jwt-auth.guard';
 import { RequestUser } from 'src/decorators/requestUser.decorator';
 import { JwtUserInfo } from '../auth/auth.types';
 import { WebsocketService } from '../websocket/websocket.service';
-import { WebsocketEventNames } from '../websocket/websocket.enum';
+import { WsEventsServer } from '../websocket/websocket.enum';
 import { Delay } from 'src/utils/common';
 import { WebsocketEventInstance } from '../websocket/websocket.multievents';
 
@@ -36,7 +36,7 @@ export class SmsController {
     const ws = new WebsocketEventInstance(
       this.websocketService,
       user._id,
-      WebsocketEventNames.FEEDBACK_SEND_SMS,
+      WsEventsServer.FEEDBACK_SEND_SMS,
     );
     ws.emit('Processando arquivos', { step: 0 });
     await Delay();

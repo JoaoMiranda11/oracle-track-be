@@ -8,10 +8,12 @@ import { SmsMessage, SmsMessageSchema } from './entity/smsMessage.schema';
 import { Connections } from 'src/libs/mongoose/connections.enum';
 import { SmsBatch, SmsBatchSchema } from './entity/smsBatch.schema';
 import { WebsocketModule } from '../websocket/websocket.module';
+import { CreditsModule } from '../credits/credits.module';
 
 @Module({
   imports: [
     WebsocketModule,
+    CreditsModule,
     MulterModule.register({
       storage: memoryStorage(),
     }),

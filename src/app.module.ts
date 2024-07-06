@@ -1,3 +1,4 @@
+import { CreditsModule } from './modules/credits/credits.module';
 import { WebsocketGateway } from './modules/websocket/websocket.gateway';
 import { CheckoutModule } from './modules/checkout/checkout.module';
 import { WebhooksModule } from './modules/webhook/webhooks.module';
@@ -19,6 +20,7 @@ import { WebsocketModule } from './modules/websocket/websocket.module';
 
 @Module({
   imports: [
+        CreditsModule, 
     CheckoutModule,
     WebhooksModule,
     UserPlansModule,

@@ -5,11 +5,13 @@ import { ProductsService } from '../products/products.service';
 import { UserPlansService } from '../userPlans/userPlans.service';
 import { PaymentStatus, ProductType } from '../payments/payment.enum';
 import { WebsocketService } from '../websocket/websocket.service';
+import { WsEventsServer } from '../websocket/websocket.enum';
+import { CreditsService } from '../credits/credits.service';
 
 @Injectable()
 export class WebhooksService {
   constructor(
-    private readonly userService: UserService,
+    private readonly creditsService: CreditsService,
     private readonly userPlanService: UserPlansService,
     private readonly paymentService: PaymentService,
     private readonly productsService: ProductsService,
@@ -24,22 +26,22 @@ export class WebhooksService {
     let notificationName: string;
     switch (payment.productType) {
       case ProductType.PLAN:
-        notificationName = 'payment_plan';
+        notificationName = WsEventsServer.PAYMENT_PLAN;
         const plan = await this.productsService.getOnePlan(productId);
         await this.userPlanService.subscribePlan(userId, productId);
-        await this.userService.addUserCredits(userId, plan.credits);
+        await this.creditsService.addUserCredits(userId, plan.credits);
         break;
       case ProductType.PACKAGE:
-        notificationName = 'payment_package';
+        notificationName = WsEventsServer.PAYMENT_PKG;
         const pack = await this.productsService.getOnePackage(productId);
-        await this.userService.addUserCredits(userId, pack.credits);
+        await this.creditsService.addUserCredits(userId, pack.credits);
         break;
       case ProductType.PLAN_EXCHANGE:
-        notificationName = 'payment_plan';
+        notificationName = WsEventsServer.PAYMENT_PLAN;
         const planExchange =
           await this.productsService.getOnePlanExchange(productId);
         await this.userPlanService.updatePlan(userId, productId);
-        await this.userService.addUserCredits(userId, planExchange.credits);
+        await this.creditsService.addUserCredits(userId, planExchange.credits);
         break;
     }
 
