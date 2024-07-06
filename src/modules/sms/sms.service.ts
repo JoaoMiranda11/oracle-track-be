@@ -7,6 +7,7 @@ import { Model, ObjectId } from 'mongoose';
 import { SmsBatch } from './entity/smsBatch.schema';
 import { MessageStatus, SmsProvider } from './sms.enum';
 import { Delay } from 'src/utils/common';
+import { v4 as uuidv4 } from 'uuid';
 
 interface MessageRes {
   phone: string;
@@ -79,16 +80,25 @@ export class SmsService {
       status: MessageStatus.FAILED,
     };
     try {
-      const res = await this.mockDisparoPro();
+      const externalId = ''; // uuidv4(); TODO: use external id? is it needed?
+      const res = await this.mockDisparoPro({
+        phone: phoneNumber,
+        message: message,
+        externalId: externalId,
+      });
       await this.smsMessageModel.create({
         metadata: res.metadata,
         phone: phoneNumber,
         smsBatchId: batchId,
         status: res.status,
+        externalId: externalId,
       });
       result.status = res.status;
     } catch (error) {
-      console.error(`Error sending message to ${phoneNumber}:`, error);
+      console.error(
+        `[BATCH: ${batchId}] Error sending message to ${phoneNumber}:`,
+        error,
+      );
     }
     return result;
   }
@@ -103,6 +113,7 @@ export class SmsService {
       debounce: number;
     },
   ) {
+    // TODO: use transaction
     const batch = await this.createBatch(
       userId,
       SmsProvider.DISPARO_PRO,
@@ -129,7 +140,7 @@ export class SmsService {
     return await Promise.all(promises);
   }
 
-  async mockDisparoPro() {
+  async mockDisparoPro(data: any) {
     await Delay(2500);
     return {
       metadata: {},
@@ -142,30 +153,15 @@ export class SmsService {
     phoneNumber: string,
     message: string,
   ): Promise<MessageRes> {
-    const result = {
-      phone: phoneNumber,
-      status: MessageStatus.FAILED,
-    };
     const batch = await this.createBatch(
       userId,
       SmsProvider.DISPARO_PRO,
       message,
     );
-    try {
-      const res = await this.mockDisparoPro();
-      await this.smsMessageModel.create({
-        metadata: res.metadata,
-        phone: phoneNumber,
-        smsBatchId: batch._id,
-        status: res.status,
-      });
-      result.status = res.status;
-    } catch (error) {
-      console.error(
-        `[BATCH: ${batch._id}] Error sending message to ${phoneNumber}:`,
-        error,
-      );
-    }
-    return result;
+    return await this.sendMessage(
+      batch._id as unknown as string,
+      phoneNumber,
+      message,
+    );
   }
 }

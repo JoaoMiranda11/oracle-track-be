@@ -8,7 +8,6 @@ import { TIMESTAMP_MIN_MS } from 'src/utils/dates';
 import { hotp } from 'otplib';
 import { UserDocument } from '../user/entity/user.schema';
 import { UserStatus } from '../user/user.enum';
-import { ConfigService } from '@nestjs/config';
 import { OtpDto } from './dto/otp.dto';
 
 @Injectable()

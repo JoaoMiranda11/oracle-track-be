@@ -11,6 +11,9 @@ export class SmsMessage {
   @Prop({ ref: SmsBatch.name, type: Types.ObjectId })
   smsBatchId: ObjectId;
 
+  @Prop({ type: String, required: true })
+  externalId: string;
+
   @Prop({ required: true, enum: MessageStatus })
   status: MessageStatus;
 
@@ -21,3 +24,4 @@ export class SmsMessage {
 export type SmsDocument = SmsMessage & { _id: Types.ObjectId };
 export const SmsMessageSchema = SchemaFactory.createForClass(SmsMessage);
 SmsMessageSchema.index({ smsBatchId: 1 });
+SmsMessageSchema.index({ externalId: 1 });

@@ -1,7 +1,7 @@
 import { WebsocketService } from './websocket.service';
 import { WebsocketEventNames } from './websocket.enum';
 
-export class WebsocketMultiEvents {
+export class WebsocketEventInstance {
   readonly wss: WebsocketService;
   readonly userId: string;
   readonly ev: string;

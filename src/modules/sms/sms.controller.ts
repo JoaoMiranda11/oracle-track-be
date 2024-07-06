@@ -16,7 +16,7 @@ import { JwtUserInfo } from '../auth/auth.types';
 import { WebsocketService } from '../websocket/websocket.service';
 import { WebsocketEventNames } from '../websocket/websocket.enum';
 import { Delay } from 'src/utils/common';
-import { WebsocketMultiEvents } from '../websocket/websocket.multievents';
+import { WebsocketEventInstance } from '../websocket/websocket.multievents';
 
 @Controller('sms')
 export class SmsController {
@@ -33,19 +33,19 @@ export class SmsController {
     @Body() body: SendSmsDto,
     @RequestUser() user: JwtUserInfo,
   ) {
-    const wsMe = new WebsocketMultiEvents(
+    const ws = new WebsocketEventInstance(
       this.websocketService,
       user._id,
       WebsocketEventNames.FEEDBACK_SEND_SMS,
     );
-    wsMe.emit('Processando arquivos', { step: 0 });
+    ws.emit('Processando arquivos', { step: 0 });
     await Delay();
     const data = await this.smsService.processCSV(file);
-    wsMe.emit('Validando dados', { step: 0 });
+    ws.emit('Validando dados', { step: 0 });
     await Delay();
     const { invalid, valid } = cleanupPhoneNumbers(data);
     const phones = valid.map((message) => message.phone);
-    wsMe.emit(`Enviando mensagens ${0}/${phones.length}`, { step: 0 });
+    ws.emit(`Enviando mensagens ${0}/${phones.length}`, { step: 0 });
     const result = await this.smsService.sendMany(
       user._id,
       body.message,
@@ -57,7 +57,7 @@ export class SmsController {
           const stepValue = Math.round(
             (data.index * 100) / (phones.length || 1),
           );
-          wsMe.emit(`Enviando mensagens ${data.index}/${phones.length}`, {
+          ws.emit(`Enviando mensagens ${data.index}/${phones.length}`, {
             step: stepValue,
           });
         },
