@@ -72,3 +72,5 @@ export class User {
 
 export type UserDocument = User & { _id: Types.ObjectId};
 export const UserSchema = SchemaFactory.createForClass(User);
+
+UserSchema.index({ email: 1 }, { unique: true });

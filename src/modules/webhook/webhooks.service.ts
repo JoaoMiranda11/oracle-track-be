@@ -49,10 +49,9 @@ export class WebhooksService {
     });
 
     if (notificationName)
-      this.websocketService.emitToUser(
-        userId,
-        notificationName,
-        PaymentStatus.PAID,
-      );
+      this.websocketService.emitToUser(userId, notificationName, {
+        msg: 'Pago',
+        metadata: PaymentStatus.PAID,
+      });
   }
 }

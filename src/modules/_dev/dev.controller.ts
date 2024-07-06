@@ -36,7 +36,7 @@ export class DevController {
     await this.wsService.emitToUser(
       '666fb9eebdee4cc9815e5243',
       'notification',
-      'Teste',
+      { msg: 'Teste' },
     );
   }
 
@@ -45,7 +45,11 @@ export class DevController {
     const { phoneNumber, message } = sendSmsDto;
 
     try {
-      await this.smsService.sendOne(phoneNumber, message);
+      await this.smsService.sendOne(
+        '666fb9eebdee4cc9815e5243',
+        phoneNumber,
+        message,
+      );
       return 'SMS sent successfully.';
     } catch (error) {
       return 'Failed to send SMS.';
@@ -72,7 +76,11 @@ export class DevController {
 
     const message =
       'Seja bem-vindo à Apostei.com! Uma experiência incrível aguarda por você. Deposite qualquer valor para receber até R$600 de Saldo em sua conta: https://apostei.com/';
-    await this.smsService.sendOne('+5587991140155', message);
+    await this.smsService.sendOne(
+      '666fb9eebdee4cc9815e5243',
+      '+5587991140155',
+      message,
+    );
 
     return {
       enviados: valid?.length,

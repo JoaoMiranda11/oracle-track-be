@@ -9,6 +9,7 @@ import {
   OnGatewayInit,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import { WsMessage } from './websocket.types';
 
 @WebSocketGateway({
   cors: {
@@ -48,7 +49,7 @@ export class WebsocketGateway
     return 'Hello world!';
   }
 
-  emitToUser(userId: string, ev: string, message: string) {
+  emitToUser(userId: string, ev: string, message: WsMessage) {
     const sockets = this.server.sockets.sockets;
     for (const socket of sockets) {
       const id = socket?.[0];

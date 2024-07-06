@@ -1,8 +1,3 @@
-interface phoneInputs {
-  name?: string;
-  phone: string;
-}
-
 export function testValidPhoneNumber(phone: string) {
   const digits = phone.replace(/\D/g, '');
 
@@ -16,8 +11,8 @@ export function testValidPhoneNumber(phone: string) {
 }
 
 
-export function cleanupPhoneNumbers(phones: phoneInputs[] = []) {
-  const invalidPhoneUsers: any[] = [];
+export function cleanupPhoneNumbers(phones: PhoneInput[] = []) {
+  const invalidPhoneUsers: PhoneInput[] = [];
   const validPhones = phones.filter((userInfo) => {
     if (!userInfo.phone || typeof userInfo.phone !== 'string') {
       invalidPhoneUsers.push(userInfo);
