@@ -3,13 +3,14 @@ import { InjectModel } from '@nestjs/mongoose';
 import * as Papa from 'papaparse';
 import { SmsMessage } from './entity/smsMessage.schema';
 import { Connections } from 'src/libs/mongoose/connections.enum';
-import { Model, ObjectId } from 'mongoose';
-import { SmsBatch } from './entity/smsBatch.schema';
+import { FilterQuery, Model, ObjectId, QueryTimestampsConfig } from 'mongoose';
+import { SmsBatch, SmsBatchDocument } from './entity/smsBatch.schema';
 import { MessageStatus, SmsProvider } from './sms.enum';
-import { Delay } from 'src/utils/common';
+import { Delay, populatePlaceholders } from 'src/utils/common';
 import { v4 as uuidv4 } from 'uuid';
 import { CreditsService } from '../credits/credits.service';
 import { CreditCosts } from '../credits/credits.enum';
+import { QueryProjection } from 'src/utils/aux.types';
 
 interface MessageRes {
   phone: string;
@@ -28,7 +29,7 @@ export class SmsService {
     @InjectModel(SmsMessage.name, Connections.main)
     private readonly smsMessageModel: Model<SmsMessage>,
     @InjectModel(SmsBatch.name, Connections.main)
-    private readonly smsBatchModel: Model<SmsBatch>,
+    private readonly smsBatchModel: Model<SmsBatchDocument>,
     private readonly creditsService: CreditsService,
   ) {}
 
@@ -52,6 +53,20 @@ export class SmsService {
     return formatedData;
   }
 
+  async getBatches(
+    userId: string,
+    options: {
+      filter?: FilterQuery<SmsBatchDocument>;
+      limit: number;
+      projection?: QueryProjection<SmsBatchDocument>;
+    },
+  ) {
+    const res = await this.smsBatchModel
+      .find({ userId, ...(options?.filter ?? {}) }, options?.projection)
+      .limit(options.limit ?? 100);
+    return res;
+  }
+
   private async createBatch(
     userId: string | ObjectId,
     provider: SmsProvider,
@@ -73,11 +88,6 @@ export class SmsService {
     );
 
     return batch;
-  }
-
-  populatePlaceholders(message: string, placeholders: any) {
-    // TODO: logic to populate by placeholders
-    return message;
   }
 
   private async sendMessage(
@@ -133,15 +143,15 @@ export class SmsService {
     const debounce = on?.debounce ?? 0;
     const promises = phones.map((phone) => {
       const promise = async () => {
-        const formatedMsg = this.populatePlaceholders(message, metadata);
+        const formatedMsg = populatePlaceholders(message, metadata);
         const res = await this.sendMessage(
           batch._id as any,
           phone,
           formatedMsg,
         );
         count++;
-        if (debounce && count % debounce === 0) {
-          on?.every?.({ ...res, index: count });
+        if (on?.every && debounce && count % debounce === 0) {
+          on.every({ ...res, index: count });
         }
         return res;
       };

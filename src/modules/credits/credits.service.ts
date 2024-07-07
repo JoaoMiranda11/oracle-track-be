@@ -18,6 +18,7 @@ import { Connections } from 'src/libs/mongoose/connections.enum';
 import { UserService } from '../user/user.service';
 import { WebsocketService } from '../websocket/websocket.service';
 import { WsEventsServer } from '../websocket/websocket.enum';
+import { SmsService } from '../sms/sms.service';
 
 @Injectable()
 export class CreditsService {

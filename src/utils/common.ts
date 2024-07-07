@@ -3,3 +3,8 @@ export function Delay(duration = 1000) {
     setTimeout(res, duration);
   });
 }
+
+export function populatePlaceholders(message: string, placeholders: any) {
+  // TODO: logic to populate by placeholders
+  return message;
+}

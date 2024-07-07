@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { ObjectId, Types } from 'mongoose';
+import { ObjectId, QueryTimestampsConfig, Types } from 'mongoose';
 import { UserSchema, User } from 'src/modules/user/entity/user.schema';
 import { SmsProvider } from '../sms.enum';
 
@@ -21,7 +21,7 @@ export class SmsBatch {
   provider: SmsProvider;
 }
 
-export type SmsBatchDocument = SmsBatch & { _id: Types.ObjectId };
+export type SmsBatchDocument = SmsBatch & { _id: Types.ObjectId } & QueryTimestampsConfig;
 export const SmsBatchSchema = SchemaFactory.createForClass(SmsBatch);
 
 SmsBatchSchema.index({ userId: 1 });

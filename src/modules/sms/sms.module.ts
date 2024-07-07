@@ -1,7 +1,7 @@
 import { MulterModule } from '@nestjs/platform-express';
 import { SmsController } from './sms.controller';
 import { SmsService } from './sms.service';
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { memoryStorage } from 'multer';
 import { MongooseModule } from '@nestjs/mongoose';
 import { SmsMessage, SmsMessageSchema } from './entity/smsMessage.schema';
@@ -13,7 +13,7 @@ import { CreditsModule } from '../credits/credits.module';
 @Module({
   imports: [
     WebsocketModule,
-    CreditsModule,
+    forwardRef(() => CreditsModule),
     MulterModule.register({
       storage: memoryStorage(),
     }),
