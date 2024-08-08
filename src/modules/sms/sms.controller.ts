@@ -45,7 +45,8 @@ export class SmsController {
     await Delay();
     const { invalid, valid } = cleanupPhoneNumbers(data);
     const phones = valid.map((message) => message.phone);
-    ws.emit(`Enviando mensagens ${0}/${phones.length}`, { step: 0 });
+    const qtt = phones.length || 1
+    ws.emit(`Enviando mensagens ${0}/${qtt}`, { step: 0 });
     const result = await this.smsService.sendMany(
       user._id,
       body.message,
@@ -55,9 +56,9 @@ export class SmsController {
         debounce: 50,
         every: (data) => {
           const stepValue = Math.round(
-            (data.index * 100) / (phones.length || 1),
+            (data.index * 100) / qtt,
           );
-          ws.emit(`Enviando mensagens ${data.index}/${phones.length}`, {
+          ws.emit(`Enviando mensagens ${data.index}/${qtt}`, {
             step: stepValue,
           });
         },
