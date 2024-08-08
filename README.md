@@ -24,7 +24,7 @@
 
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+Simple massive message notification dashboard backend in NestJS
 
 ## Installation
 
