@@ -26,6 +26,8 @@
 
 Simple massive message notification dashboard backend in NestJS
 
+TODO: Tests e2e, Unit Tests, Swagger Doc
+
 ## Installation
 
 ```bash
